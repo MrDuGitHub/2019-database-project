@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - ./http_public_html:/www/http_public_html
+    - ./https_public_html:/www/https_public_html
+    - ./https_cert:/www/https_cert
+    - ./https_key:/www/https_key
+    - ./nginx/nginx.conf.d:/etc/nginx/conf.d
+    restart: always
+    networks:
+    - network
+  php:
+    build: './php/'
+    volumes:
+    - ./http_public_html:/www/http_public_html
+    - ./https_public_html:/www/https_public_html
+    - ./php/php-fpm.d:/etc/php7/php-fpm.d
+    - ./php/php.ini:/etc/php7/php.ini
+    restart: always
+    networks:
+    - network
+  mysql:
+    image: mariadb:latest
+    environment:
+    - MYSQL_ROOT_PASSWORD=HtlzbexGFWw9UcwpyLas
+    - MYSQL_DATABASE=database
+    volumes:
+    - ./mysql/database:/var/lib/mysql
+    restart: always
+    networks:
+    - network
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+    - "127.0.0.1:888:80"
+    networks:
+    - network
+    environment:
+      PMA_HOST: mysql
+      MYSQL_USERNAME: root
+networks:
+  network:
